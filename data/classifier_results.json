@@ -1,0 +1,20 @@
+{
+  "total_posts": 81,
+  "sources": 47,
+  "districts_covered": 21,
+  "accuracy": 0.9259,
+  "macro_f1": 0.9185,
+  "svm_f1": 0.5826,
+  "lr_f1": 0.269,
+  "maj_f1": 0.13,
+  "district_detection_rate": 0.6049,
+  "improvement": 0.336,
+  "misclassified": 6,
+  "per_domain_f1": {
+    "Flood": 0.9737,
+    "Elephant": 0.8889,
+    "Agriculture": 0.8889,
+    "Health": 0.9524,
+    "Weather": 0.8889
+  }
+}
