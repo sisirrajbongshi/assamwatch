@@ -789,9 +789,14 @@ def main():
     elif page == "🏥 Vulnerability Profile":
         st.subheader("🏥 Population Health Vulnerability Profile")
         st.info(
-            "This profile is computed from your Google Form survey data — "
-            "the human health layer that makes AssamWatch unique compared to "
-            "existing flood warning systems."
+            "**Survey region: Goalpara district and its surrounding area.** "
+            "This is a single-region pilot survey (n=100), not an independent "
+            "multi-district study. 87% of respondents are from Goalpara "
+            "district itself; the remaining categories shown below (Kamrup, "
+            "South Salmara, Meghalaya border area, Dhubri, Other) reflect a "
+            "small number of students from immediately adjoining areas "
+            "(2–5 respondents each) and are shown for transparency only — "
+            "they should not be read as separately sampled district estimates."
         )
 
         if len(vuln_df) > 0:
@@ -804,15 +809,19 @@ def main():
                     x="district", y="avg_hvi",
                     color="vulnerability_label",
                     color_discrete_map=RISK_COLORS,
-                    title="Health Vulnerability Index (HVI) by District",
+                    title="HVI by Home District (Goalpara Study Region)",
                     labels={"avg_hvi": "HVI Score (0–10)",
-                            "district": "District"},
+                            "district": "Home District (self-reported)"},
                 )
                 fig.add_hline(y=7.0, line_dash="dash",
                               line_color="red",   annotation_text="CRITICAL threshold")
                 fig.add_hline(y=5.0, line_dash="dash",
                               line_color="orange",annotation_text="HIGH threshold")
                 st.plotly_chart(fig, use_container_width=True)
+                st.caption("⚠️ n varies sharply by category: Goalpara n=87; "
+                           "all other categories n=1–5. Bars for small-n "
+                           "categories are indicative only, not statistically "
+                           "reliable district estimates.")
 
             with col2:
                 # Sinusitis prevalence
@@ -821,26 +830,41 @@ def main():
                         vuln_df.head(12),
                         x="district",
                         y="high_sinusitis_pct",
-                        title="% Population with High Sinusitis Severity",
+                        title="% Reporting High Sinusitis Severity",
                         labels={"high_sinusitis_pct": "% Respondents",
-                                "district": "District"},
+                                "district": "Home District (self-reported)"},
                         color="high_sinusitis_pct",
                         color_continuous_scale="Reds",
                     )
                     st.plotly_chart(fig, use_container_width=True)
+                    st.caption("⚠️ Same small-n caveat applies — see note above.")
 
-            # Key finding highlight
-            if len(vuln_df) > 0:
+            # Key finding highlight — reframed to focus on the Goalpara
+            # study region itself, not a fabricated district comparison
+            goalpara_row = vuln_df[vuln_df["district"] == "Goalpara"]
+            if len(goalpara_row) > 0:
+                g = goalpara_row.iloc[0]
+                st.markdown(f"""
+                <div class="alert-critical">
+                <b>🔍 KEY FINDING FROM SURVEY DATA:</b><br>
+                Within the <b>Goalpara district study region</b> (n={g.get('n_respondents','87')}),
+                mean HVI = {g['avg_hvi']:.1f}/10, with
+                {g.get('high_sinusitis_pct', 0):.0f}%
+                of respondents reporting high or chronic sinusitis severity.
+                This establishes a primary-survey health vulnerability baseline
+                for the region, used to calibrate the AssamWatch risk fusion
+                model (Section 6). It is a pilot single-region estimate, not
+                a comparative multi-district finding.
+                </div>
+                """, unsafe_allow_html=True)
+            elif len(vuln_df) > 0:
                 most_vulnerable = vuln_df.iloc[0]
                 st.markdown(f"""
                 <div class="alert-critical">
                 <b>🔍 KEY FINDING FROM SURVEY DATA:</b><br>
-                <b>{most_vulnerable['district']}</b> has the highest population
-                vulnerability (HVI = {most_vulnerable['avg_hvi']:.1f}/10)
+                Mean HVI in the Goalpara study region = {most_vulnerable['avg_hvi']:.1f}/10,
                 with {most_vulnerable.get('high_sinusitis_pct', 0):.0f}%
-                of surveyed respondents reporting high sinusitis severity.
-                When combined with high environmental risk — this district
-                faces compounded health burden during humid periods.
+                of respondents reporting high sinusitis severity.
                 </div>
                 """, unsafe_allow_html=True)
 
